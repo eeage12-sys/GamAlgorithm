@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 28
-  productGUID: 7b32341aa6abe7e41a0ec2e599d98c1d
+  productGUID: 1b5368d16cb95a24ba253d50b983de3a
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: GamAlgorithm
+  productName: My project
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -527,6 +527,9 @@ PlayerSettings:
   - m_BuildTarget: AndroidPlayer
     m_APIs: 150000000b000000
     m_Automatic: 0
+  - m_BuildTarget: MacStandaloneSupport
+    m_APIs: 10000000
+    m_Automatic: 1
   - m_BuildTarget: WindowsStandaloneSupport
     m_APIs: 0200000012000000
     m_Automatic: 0
@@ -840,14 +843,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: GamAlgorithm
+  metroPackageName: My project
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: GamAlgorithm
+  metroApplicationDescription: My project
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -918,10 +921,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 1367f866-158f-43a7-b84d-325535f45646
+  cloudProjectId: abf41cbf-7c15-4061-914c-e3421fd0bb74
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: GamAlgorithm
+  projectName: My project 2026-06-01_12-13-35
   organizationId: eeage12
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
