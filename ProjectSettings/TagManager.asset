@@ -7,6 +7,7 @@ TagManager:
   - MonsterHead
   - MonsterBody
   - MonsterLeg
+  - Ground
   layers:
   - Default
   - TransparentFX
@@ -15,8 +16,8 @@ TagManager:
   - Water
   - UI
   - Monster
-  - 
-  - 
+  - Player
+  - Bullet
   - 
   - 
   - 
