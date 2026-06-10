@@ -1,43 +1,69 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class IntegratedMonsterAI : MonoBehaviour
 {
-    // FSM »óÅÂ ¸Ó½Å
+    // FSM ìƒíƒœ ë¨¸ì‹ 
     public enum AIState
     {
         Patrol,
         Chase,
-        Attack
+        Attack,
+        Die // â¬…ï¸ ì‚¬ë§ ìƒíƒœ ì¶”ê°€
     }
 
-    [Header("ÇöÀç AI »óÅÂ ±×·¡ÇÁ")]
+    [Header("í˜„ì¬ AI ìƒíƒœ ê·¸ë˜í”„")]
     public AIState currentState = AIState.Patrol;
 
-    [Header("Å¸°Ù ¿ÀºêÁ§Æ® ¿¬µ¿")]
+    [Header("íƒ€ê²Ÿ ì˜¤ë¸Œì íŠ¸ ì—°ë™")]
     public Transform playerTarget;
 
-    [Header("¼øÂû ³ëµå ±×·¡ÇÁ (ÀÚ·á±¸Á¶)")]
+    [Header("ìˆœì°° ë…¸ë“œ ê·¸ë˜í”„ (ìë£Œêµ¬ì¡°)")]
     public List<Transform> waypointNodes = new List<Transform>();
-
     private int currentTargetIndex = 0;
 
-    [Header("AI ¼¾¼­ ¼³Á¤°ª")]
+    [Header("AI ì„¼ì„œ ì„¤ì •ê°’")]
     public float speed = 3f;
     public float viewAngle = 60f;
     public float chaseDistance = 7f;
-    public float attackDistance = 2f;
+
+    [Tooltip("ëª¸ë°• ê³µê²©ì´ ë°œë™í•  ì‚¬ê±°ë¦¬ì…ë‹ˆë‹¤.")]
+    public float attackDistance = 1.2f;
+
+    [Header("ëª¸ë°•(Body Hit) ì‹œìŠ¤í…œ ì„¤ì •")]
+    public int bodyHitDamage = 10;
+    public float attackCooldown = 1.0f;
+    private float currentAttackCooldown = 0f;
+
+    [Header("ëª¬ìŠ¤í„° ìŠ¤íƒ¯ (ì²´ë ¥ ì‹œìŠ¤í…œ)")]
+    public float maxHealth = 100f;          // ìµœëŒ€ ì²´ë ¥
+    public float currentHealth;             // í˜„ì¬ ì²´ë ¥
+    private bool isDead = false;            // ì‚¬ë§ í”Œë˜ê·¸
+
+    void Start()
+    {
+        // ê²Œì„ ì‹œì‘ ì‹œ ì²´ë ¥ ì´ˆê¸°í™”
+        currentHealth = maxHealth;
+    }
 
     void Update()
     {
+        if (isDead) return; // ì£½ì—ˆë‹¤ë©´ ëª¨ë“  AI ë¡œì§ ì¤‘ì§€
+
+        // ì¿¨íƒ€ì„ ì‹¤ì‹œê°„ ê³„ì‚°
+        if (currentAttackCooldown > 0f)
+        {
+            currentAttackCooldown -= Time.deltaTime;
+        }
+
         EvaluateAIConstraints();
         ExecuteStateArchitecture();
     }
 
-    // ÇÃ·¹ÀÌ¾î °¨Áö
+    // í”Œë ˆì´ì–´ ê°ì§€ ë° ìƒíƒœ ì „í™˜ íŒì •
     void EvaluateAIConstraints()
     {
-        if (playerTarget == null) return;
+        if (isDead || playerTarget == null) return;
 
         Vector3 offset = playerTarget.position - transform.position;
         float sqrDistanceToPlayer = offset.sqrMagnitude;
@@ -65,67 +91,129 @@ public class IntegratedMonsterAI : MonoBehaviour
         }
     }
 
-    AIState ChaseStateTransition()
-    {
-        return AIState.Chase;
-    }
-
-    // »óÅÂ ½ÇÇà
+    // ìƒíƒœë³„ í–‰ë™ ì‹¤í–‰
     void ExecuteStateArchitecture()
     {
+        if (isDead) return;
+
         switch (currentState)
         {
             case AIState.Patrol:
-
-                if (waypointNodes.Count == 0)
-                    return;
+                if (waypointNodes.Count == 0) return;
 
                 Vector3 targetNodePos = waypointNodes[currentTargetIndex].position;
-
                 MoveAndRotateSlerp(targetNodePos);
 
-                // ¡Ú [¹ö±× ¼öÁ¤ ¿Ï·á] 
-                // ±âÁ¸ 0.01f ¹æ½ÄÀº ³Ê¹« Á¤¹ĞÇØ¼­ ¸ó½ºÅÍ µ¢Ä¡³ª ¹Ù´Ú ¸¶Âû ¶§¹®¿¡ ¸ØÃß¸é ÀÎ½ÄÀ» ¸øÇß½À´Ï´Ù.
-                // ¿ÀÂ÷ ¹üÀ§¸¦ ¾à 0.8m(Á¦°ö°ª 0.64f)·Î ³Î³ÎÇÏ°Ô ³ĞÇô¼­, ³ëµå ±ÙÃ³¿¡¸¸ °¡µµ µ¹¾Æ°¡µµ·Ï ¼öÁ¤Çß½À´Ï´Ù.
                 if ((targetNodePos - transform.position).sqrMagnitude < 0.64f)
                 {
                     currentTargetIndex = (currentTargetIndex + 1) % waypointNodes.Count;
                 }
-
                 break;
 
             case AIState.Chase:
-
                 Vector3 chaseTarget = playerTarget.position;
-
-                // ¡Ú ³ôÀÌ °íÁ¤
                 chaseTarget.y = transform.position.y;
 
                 MoveAndRotateSlerp(chaseTarget);
-
                 break;
 
             case AIState.Attack:
-
                 Vector3 attackTarget = playerTarget.position;
-
-                // ¡Ú ³ôÀÌ °íÁ¤
                 attackTarget.y = transform.position.y;
 
-                LookAtTargetSlerp(attackTarget);
+                MoveAndRotateSlerp(attackTarget);
 
-                Debug.LogWarning("[NCS ¹°¸® ÀÌº¥Æ®/°Å¸® ÆÇÁ¤ È®ÀÎ]: °ø°İ °Å¸® ³» ÁøÀÔ¿Ï·á.");
-
+                if (currentAttackCooldown <= 0f)
+                {
+                    ApplyBodyHitDamage();
+                }
                 break;
         }
     }
 
-    // ÀÌµ¿ + È¸Àü
+    // ëª¸ë°• ëŒ€ë¯¸ì§€ ì²˜ë¦¬
+    // [ìˆ˜ì •ëœ ë¶€ë¶„] ëª¬ìŠ¤í„° ìŠ¤í¬ë¦½íŠ¸ì˜ ëª¸ë°• ëŒ€ë¯¸ì§€ ì²˜ë¦¬ ë©”ì„œë“œ
+    void ApplyBodyHitDamage()
+    {
+        currentAttackCooldown = attackCooldown; // ì¿¨íƒ€ì„ ì´ˆê¸°í™”
+
+        if (playerTarget != null)
+        {
+            // í”Œë ˆì´ì–´ ì˜¤ë¸Œì íŠ¸ì—ì„œ PlayerStatus ìŠ¤í¬ë¦½íŠ¸ë¥¼ ì°¾ìŠµë‹ˆë‹¤.
+            PlayerStatus playerStatus = playerTarget.GetComponent<PlayerStatus>();
+
+            if (playerStatus != null)
+            {
+                // í”Œë ˆì´ì–´ì—ê²Œ ì„¤ì •í•´ë‘” ë°ë¯¸ì§€(bodyHitDamage)ë§Œí¼ í”¼í•´ë¥¼ ì…í™ë‹ˆë‹¤.
+                playerStatus.TakeDamage(bodyHitDamage);
+                Debug.LogWarning($"[NCS ëª¸ë°• ì„±ê³µ]: í”Œë ˆì´ì–´ íƒ€ê²Ÿì—ê²Œ ëŒ€ë¯¸ì§€ {bodyHitDamage} ë¶€ì—¬ ì™„ë£Œ!");
+            }
+            else
+            {
+                Debug.LogError("[ì—°ë™ ì—ëŸ¬]: í”Œë ˆì´ì–´ íƒ€ê²Ÿ ì˜¤ë¸Œì íŠ¸ì— 'PlayerStatus' ìŠ¤í¬ë¦½íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤! ì»´í¬ë„ŒíŠ¸ë¥¼ ì¶”ê°€í•´ì£¼ì„¸ìš”.");
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // ğŸ’¥ FPS íˆ¬ì‚¬ì²´ í”¼ê²© ì‹œìŠ¤í…œ (ë¬¼ë¦¬ ì¶©ëŒ ì´ë²¤íŠ¸)
+    // ---------------------------------------------------------------------
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (isDead) return;
+
+        // ì¶©ëŒí•œ ì˜¤ë¸Œì íŠ¸ì˜ íƒœê·¸ê°€ "Bullet"(ì´ì•Œ)ì¸ì§€ í™•ì¸í•©ë‹ˆë‹¤.
+        if (collision.gameObject.CompareTag("Bullet"))
+        {
+            // ì˜ˆì‹œë¡œ ì´ì•Œ í•˜ë‚˜ë‹¹ 20ì˜ ëŒ€ë¯¸ì§€ë¥¼ ê³ ì •ìœ¼ë¡œ ì¤€ë‹¤ê³  ê°€ì •í•©ë‹ˆë‹¤.
+            // (ë§Œì•½ ì´ì•Œë§ˆë‹¤ ëŒ€ë¯¸ì§€ê°€ ë‹¤ë¥´ë‹¤ë©´ ì´ì•Œ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ê°’ì„ ê°€ì ¸ì™€ì•¼ í•©ë‹ˆë‹¤)
+            float damageAmount = 20f;
+
+            TakeDamage(damageAmount);
+
+            // ë§ì€ ì´ì•Œ ì˜¤ë¸Œì íŠ¸ëŠ” ë¶€ë”ªí˜”ìœ¼ë‹ˆ ë§µì—ì„œ ì‚­ì œí•©ë‹ˆë‹¤.
+            Destroy(collision.gameObject);
+        }
+    }
+
+    // ëŒ€ë¯¸ì§€ë¥¼ ë°›ëŠ” ë©”ì„œë“œ (ì™¸ë¶€ í˜¸ì¶œ ê°€ëŠ¥í•˜ë„ë¡ public)
+    public void TakeDamage(float amount)
+    {
+        if (isDead) return;
+
+        currentHealth -= amount;
+        Debug.Log($"[ëª¬ìŠ¤í„° í”¼ê²©]: {amount} ëŒ€ë¯¸ì§€ ë°›ìŒ. ë‚¨ì€ ì²´ë ¥: {currentHealth}/{maxHealth}");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    // ì‚¬ë§ ì²˜ë¦¬
+    void Die()
+    {
+        isDead = true;
+        currentState = AIState.Die;
+
+        // ëª¬ìŠ¤í„°ê°€ ì£½ìœ¼ë©´ ë” ì´ìƒ ë¬¼ë¦¬ì ìœ¼ë¡œ í”Œë ˆì´ì–´ì™€ ë¶€ë”ªíˆì§€ ì•Šê²Œ ì²˜ë¦¬
+        GetComponent<Collider>().enabled = false;
+
+        if (GetComponent<Rigidbody>() != null)
+        {
+            GetComponent<Rigidbody>().isKinematic = true; // ë¬¼ë¦¬ ì‹œë®¬ë ˆì´ì…˜ ì¢…ë£Œ
+        }
+
+        Debug.LogError("[ëª¬ìŠ¤í„° ì‚¬ë§]: ëª¬ìŠ¤í„°ê°€ ì²˜ì¹˜ë˜ì—ˆìŠµë‹ˆë‹¤.");
+
+        // ì‚¬ë§ ì• ë‹ˆë©”ì´ì…˜ ì—°ì¶œ í›„ 2ì´ˆ ë’¤ ì˜¤ë¸Œì íŠ¸ ì™„ì „ ì‚­ì œ
+        Destroy(gameObject, 2f);
+    }
+
+    // ì´ë™ + íšŒì „
     void MoveAndRotateSlerp(Vector3 destination)
     {
-        // ¡Ú ¸ñÀûÁö ³ôÀÌ °­Á¦ °íÁ¤
         destination.y = transform.position.y;
-
         LookAtTargetSlerp(destination);
 
         Vector3 nextPosition = Vector3.MoveTowards(
@@ -133,13 +221,11 @@ public class IntegratedMonsterAI : MonoBehaviour
                 destination,
                 speed * Time.deltaTime);
 
-        // ¡Ú ÀÌµ¿ ÈÄ¿¡µµ ³ôÀÌ °­Á¦ °íÁ¤
         nextPosition.y = transform.position.y;
-
         transform.position = nextPosition;
     }
 
-    // È¸Àü
+    // íšŒì „
     void LookAtTargetSlerp(Vector3 targetPosition)
     {
         Vector3 direction = targetPosition - transform.position;
@@ -148,7 +234,6 @@ public class IntegratedMonsterAI : MonoBehaviour
         if (direction != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-
             transform.rotation = Quaternion.Slerp(
                     transform.rotation,
                     targetRotation,
@@ -156,16 +241,18 @@ public class IntegratedMonsterAI : MonoBehaviour
         }
     }
 
-    // Scene ºä ½Ã¾ß°¢ Ç¥½Ã
+    // Scene ë·° ê¸°ë¯¹ ì‹œê°í™”
     void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, chaseDistance);
 
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackDistance);
+
         Vector3 leftBoundary = Quaternion.Euler(0, -viewAngle / 2f, 0) * transform.forward;
         Vector3 rightBoundary = Quaternion.Euler(0, viewAngle / 2f, 0) * transform.forward;
 
-        Gizmos.color = Color.red;
         Gizmos.DrawRay(transform.position, leftBoundary * chaseDistance);
         Gizmos.DrawRay(transform.position, rightBoundary * chaseDistance);
     }
