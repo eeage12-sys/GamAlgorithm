@@ -9,7 +9,7 @@ public class IntegratedMonsterAI : MonoBehaviour
         Patrol,
         Chase,
         Attack,
-        Die // ⬅️ 사망 상태 추가
+        Die
     }
 
     [Header("현재 AI 상태 그래프")]
@@ -40,10 +40,20 @@ public class IntegratedMonsterAI : MonoBehaviour
     public float currentHealth;             // 현재 체력
     private bool isDead = false;            // 사망 플래그
 
+    // 🔴 [새로 추가된 UI 연동 변수]
+    [Header("UI 연동")]
+    public MonsterHPBar hpBarScript;
+
     void Start()
     {
         // 게임 시작 시 체력 초기화
         currentHealth = maxHealth;
+
+        // 🔴 [새로 추가] 시작할 때 HP 바를 100% 상태로 초기화합니다.
+        if (hpBarScript != null)
+        {
+            hpBarScript.UpdateHPBar(currentHealth, maxHealth);
+        }
     }
 
     void Update()
@@ -132,19 +142,16 @@ public class IntegratedMonsterAI : MonoBehaviour
     }
 
     // 몸박 대미지 처리
-    // [수정된 부분] 몬스터 스크립트의 몸박 대미지 처리 메서드
     void ApplyBodyHitDamage()
     {
         currentAttackCooldown = attackCooldown; // 쿨타임 초기화
 
         if (playerTarget != null)
         {
-            // 플레이어 오브젝트에서 PlayerStatus 스크립트를 찾습니다.
             PlayerStatus playerStatus = playerTarget.GetComponent<PlayerStatus>();
 
             if (playerStatus != null)
             {
-                // 플레이어에게 설정해둔 데미지(bodyHitDamage)만큼 피해를 입힙니다.
                 playerStatus.TakeDamage(bodyHitDamage);
                 Debug.LogWarning($"[NCS 몸박 성공]: 플레이어 타겟에게 대미지 {bodyHitDamage} 부여 완료!");
             }
@@ -155,34 +162,32 @@ public class IntegratedMonsterAI : MonoBehaviour
         }
     }
 
-    // ---------------------------------------------------------------------
     // 💥 FPS 투사체 피격 시스템 (물리 충돌 이벤트)
-    // ---------------------------------------------------------------------
     private void OnCollisionEnter(Collision collision)
     {
         if (isDead) return;
 
-        // 충돌한 오브젝트의 태그가 "Bullet"(총알)인지 확인합니다.
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            // 예시로 총알 하나당 20의 대미지를 고정으로 준다고 가정합니다.
-            // (만약 총알마다 대미지가 다르다면 총알 스크립트에서 값을 가져와야 합니다)
             float damageAmount = 20f;
-
             TakeDamage(damageAmount);
-
-            // 맞은 총알 오브젝트는 부딪혔으니 맵에서 삭제합니다.
             Destroy(collision.gameObject);
         }
     }
 
-    // 대미지를 받는 메서드 (외부 호출 가능하도록 public)
+    // 대미지를 받는 메서드
     public void TakeDamage(float amount)
     {
         if (isDead) return;
 
         currentHealth -= amount;
         Debug.Log($"[몬스터 피격]: {amount} 대미지 받음. 남은 체력: {currentHealth}/{maxHealth}");
+
+        // 🔴 [새로 추가] 피격당할 때마다 피통 UI를 실시간으로 업데이트합니다.
+        if (hpBarScript != null)
+        {
+            hpBarScript.UpdateHPBar(currentHealth, maxHealth);
+        }
 
         if (currentHealth <= 0)
         {
@@ -196,17 +201,21 @@ public class IntegratedMonsterAI : MonoBehaviour
         isDead = true;
         currentState = AIState.Die;
 
-        // 몬스터가 죽으면 더 이상 물리적으로 플레이어와 부딪히지 않게 처리
+        // 🔴 [새로 추가] 몬스터가 죽으면 머리 위 피통 UI를 화면에서 숨깁니다.
+        if (hpBarScript != null)
+        {
+            hpBarScript.gameObject.SetActive(false);
+        }
+
         GetComponent<Collider>().enabled = false;
 
         if (GetComponent<Rigidbody>() != null)
         {
-            GetComponent<Rigidbody>().isKinematic = true; // 물리 시뮬레이션 종료
+            GetComponent<Rigidbody>().isKinematic = true;
         }
 
         Debug.LogError("[몬스터 사망]: 몬스터가 처치되었습니다.");
 
-        // 사망 애니메이션 연출 후 2초 뒤 오브젝트 완전 삭제
         Destroy(gameObject, 2f);
     }
 
