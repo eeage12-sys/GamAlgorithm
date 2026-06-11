@@ -40,7 +40,7 @@ public class IntegratedMonsterAI : MonoBehaviour
     public float currentHealth;             // 현재 체력
     private bool isDead = false;            // 사망 플래그
 
-    // 🔴 [새로 추가된 UI 연동 변수]
+    //  [새로 추가된 UI 연동 변수]
     [Header("UI 연동")]
     public MonsterHPBar hpBarScript;
 
@@ -49,7 +49,7 @@ public class IntegratedMonsterAI : MonoBehaviour
         // 게임 시작 시 체력 초기화
         currentHealth = maxHealth;
 
-        // 🔴 [새로 추가] 시작할 때 HP 바를 100% 상태로 초기화합니다.
+        //  [새로 추가] 시작할 때 HP 바를 100% 상태로 초기화합니다.
         if (hpBarScript != null)
         {
             hpBarScript.UpdateHPBar(currentHealth, maxHealth);
@@ -162,7 +162,7 @@ public class IntegratedMonsterAI : MonoBehaviour
         }
     }
 
-    // 💥 FPS 투사체 피격 시스템 (물리 충돌 이벤트)
+    // FPS 투사체 피격 시스템 (물리 충돌 이벤트)
     private void OnCollisionEnter(Collision collision)
     {
         if (isDead) return;
@@ -183,7 +183,7 @@ public class IntegratedMonsterAI : MonoBehaviour
         currentHealth -= amount;
         Debug.Log($"[몬스터 피격]: {amount} 대미지 받음. 남은 체력: {currentHealth}/{maxHealth}");
 
-        // 🔴 [새로 추가] 피격당할 때마다 피통 UI를 실시간으로 업데이트합니다.
+        // [새로 추가] 피격당할 때마다 피통 UI를 실시간으로 업데이트합니다.
         if (hpBarScript != null)
         {
             hpBarScript.UpdateHPBar(currentHealth, maxHealth);
@@ -201,7 +201,7 @@ public class IntegratedMonsterAI : MonoBehaviour
         isDead = true;
         currentState = AIState.Die;
 
-        // 🔴 [새로 추가] 몬스터가 죽으면 머리 위 피통 UI를 화면에서 숨깁니다.
+        // [새로 추가] 몬스터가 죽으면 머리 위 피통 UI를 화면에서 숨깁니다.
         if (hpBarScript != null)
         {
             hpBarScript.gameObject.SetActive(false);

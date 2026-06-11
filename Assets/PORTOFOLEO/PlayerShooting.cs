@@ -30,7 +30,7 @@ public class PlayerShooting : MonoBehaviour
     {
         if (bulletPrefab == null || firePoint == null || mainCamera == null) return;
 
-        // ★ 핵심 변경: 마우스 좌표 대신 '화면 정중앙' 좌표를 만듭니다.
+        // 핵심 변경: 마우스 좌표 대신 '화면 정중앙' 좌표를 만듭니다.
         Vector3 screenCenter = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
 
         // 화면 정중앙에서 레이저(Ray)를 쏩니다.

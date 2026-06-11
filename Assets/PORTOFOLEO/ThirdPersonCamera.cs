@@ -9,7 +9,7 @@ public class ThirdPersonCamera : MonoBehaviour
     public float distance = 4.0f;
     public float height = 1.8f;
 
-    // ★ [핵심 추가] 캐릭터를 화면 왼쪽으로 치워주는 오프셋 값
+    // [핵심 추가] 캐릭터를 화면 왼쪽으로 치워주는 오프셋 값
     [Header("가로 위치 오프셋 (캐릭터 왼쪽으로 치우기)")]
     public float sideOffset = 1.5f;   // 값이 클수록 캐릭터가 더 왼쪽으로 갑니다.
 
@@ -44,12 +44,12 @@ public class ThirdPersonCamera : MonoBehaviour
 
             Quaternion rotation = Quaternion.Euler(y, x, 0);
 
-            // ★ [핵심 변경] 플레이어 몸통도 카메라의 좌우 회전에 맞춰 같이 돌려야 조준이 편해집니다.
+            // [핵심 변경] 플레이어 몸통도 카메라의 좌우 회전에 맞춰 같이 돌려야 조준이 편해집니다.
             target.rotation = Quaternion.Euler(0, x, 0);
 
             Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
 
-            // ★ [핵심 변경] 위치 계산 로직 수정
+            // [핵심 변경] 위치 계산 로직 수정
             // 1. 캐릭터 머리/어깨 높이 구하기
             Vector3 targetPosition = target.position + new Vector3(0, height, 0);
 
