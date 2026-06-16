@@ -30,7 +30,7 @@ public class MonsterStateGizmo : MonoBehaviour
             return;
         }
 
-        // Vector3.Distance는 두 위치 사이의 거리를 계산합니다.
+        
         float distance = Vector3.Distance(transform.position, player.position);
 
         if (distance <= attackDistance)
@@ -49,7 +49,7 @@ public class MonsterStateGizmo : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        // OnDrawGizmos는 Scene 뷰에 개발용 시각 표시를 그릴 때 사용하는 Unity 메시지 메서드입니다.
+        
         Gizmos.color = GetStateColor();
         Gizmos.DrawSphere(transform.position, 0.35f);
 

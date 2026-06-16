@@ -58,7 +58,6 @@ public class DfsGizmoVisualizer : MonoBehaviour
             return;
         }
 
-        // Stack.Pop은 가장 나중에 넣은 칸을 먼저 꺼냅니다.
         currentNode = frontier.Pop();
 
         foreach (Vector2Int neighbor in GetNeighbors(currentNode))
@@ -70,7 +69,6 @@ public class DfsGizmoVisualizer : MonoBehaviour
 
             visited.Add(neighbor);
 
-            // Stack.Push는 다음에 방문할 후보 칸을 위에 쌓습니다.
             frontier.Push(neighbor);
         }
     }

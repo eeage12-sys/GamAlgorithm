@@ -6,7 +6,7 @@ public class MonsterSight : MonoBehaviour
     public float sightAngle = 60f;
 
 
-    // Update is called once per frame
+    
     void Update()
     {
         Vector3 dirToPlayer = (player.position - transform.position).normalized;

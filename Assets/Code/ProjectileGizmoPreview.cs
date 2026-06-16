@@ -37,7 +37,7 @@ public class ProjectileGizmoPreview : MonoBehaviour
             return;
         }
 
-        // leftArrowKey와 rightArrowKey는 현재 키보드의 방향키 입력을 읽는 Input System 프로퍼티입니다.
+       
         if (Keyboard.current.leftArrowKey.isPressed)
         {
             yawAngle -= 60f * Time.deltaTime;
@@ -48,7 +48,6 @@ public class ProjectileGizmoPreview : MonoBehaviour
             yawAngle += 60f * Time.deltaTime;
         }
 
-        // Q/E 키로 발사 각도를 낮추거나 높입니다.
         if (Keyboard.current.qKey.isPressed)
         {
             launchAngle -= 40f * Time.deltaTime;
@@ -59,10 +58,8 @@ public class ProjectileGizmoPreview : MonoBehaviour
             launchAngle += 40f * Time.deltaTime;
         }
 
-        // Mathf.Clamp는 값을 지정한 최소/최대 범위 안에 가두는 메서드입니다.
         launchAngle = Mathf.Clamp(launchAngle, 5f, 80f);
 
-        // Space 키를 누른 순간 실제 투사체를 발사합니다.
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             FireProjectile();
@@ -71,12 +68,10 @@ public class ProjectileGizmoPreview : MonoBehaviour
 
     private Vector3 GetLaunchVelocity()
     {
-        // Quaternion.Euler는 각도 값을 회전으로 바꾸는 메서드입니다.
-        // Unity에서 X축 양수 회전은 앞 방향을 아래로 기울입니다.
-        // 그래서 "위로 launchAngle도"를 만들기 위해 X축에는 음수 각도를 넣습니다.
+       
         Quaternion rotation = Quaternion.Euler(-launchAngle, yawAngle, 0f);
 
-        // Vector3.forward는 월드 기준 앞 방향 벡터입니다.
+        
         return rotation * Vector3.forward * launchSpeed;
     }
 
@@ -87,7 +82,6 @@ public class ProjectileGizmoPreview : MonoBehaviour
             return;
         }
 
-        // Instantiate는 프리팹을 씬에 복제하여 새 GameObject를 만드는 메서드입니다.
         GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
         Rigidbody body = projectile.GetComponent<Rigidbody>();
 
@@ -96,7 +90,6 @@ public class ProjectileGizmoPreview : MonoBehaviour
             return;
         }
 
-        // Unity 6에서 linearDamping은 Inspector의 Linear Damping 값과 대응합니다.
         body.linearDamping = linearDamping;
         body.useGravity = true;
         body.linearVelocity = GetLaunchVelocity();
@@ -116,17 +109,14 @@ public class ProjectileGizmoPreview : MonoBehaviour
         {
             Vector3 previousPosition = position;
 
-            // linearDamping이 0보다 크면 속도가 조금씩 줄어듭니다.
             velocity *= 1f - linearDamping * timeStep;
 
-            // Physics.gravity는 현재 프로젝트에 설정된 중력 벡터입니다.
             velocity += Physics.gravity * timeStep;
             position += velocity * timeStep;
 
             Vector3 move = position - previousPosition;
             float distance = move.magnitude;
 
-            // Physics.Raycast는 이전 점에서 다음 점 방향으로 선을 쏴 Collider와 닿는지 검사합니다.
             if (Physics.Raycast(previousPosition, move.normalized, out RaycastHit hit, distance))
             {
                 hasHit = true;
@@ -146,13 +136,11 @@ public class ProjectileGizmoPreview : MonoBehaviour
 
         if (!hasHit)
         {
-            // maxSteps 안에서 Collider를 만나지 못했다면 마지막 예측 지점을 표시합니다.
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireSphere(lastPredictedPoint, 0.25f);
             return;
         }
 
-        // 착탄 지점을 한 번 더 크게 표시합니다.
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(hitPoint, 0.08f);
     }
